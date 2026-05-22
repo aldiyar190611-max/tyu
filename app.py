@@ -25,6 +25,78 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* Coin cursor */
+* { cursor: none !important; }
+#coin-cursor {
+    position: fixed; pointer-events: none; z-index: 99999;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffd700, #b8860b);
+    border: 2px solid #ffa500;
+    box-shadow: 0 0 8px rgba(255,215,0,0.6);
+    transform: translate(-50%, -50%);
+    transition: transform 0.05s;
+}
+.coin-particle {
+    position: fixed; pointer-events: none; z-index: 99998;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffd700, #b8860b);
+    border: 1px solid #ffa500;
+    box-shadow: 0 0 4px rgba(255,215,0,0.5);
+    animation: coinFall linear forwards;
+}
+@keyframes coinFall {
+    0%   { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0.3); }
+}
+</style>
+<div id="coin-cursor"></div>
+<script>
+(function() {
+    var cursor = document.getElementById('coin-cursor');
+    var mx = 0, my = 0;
+    var lastX = 0, lastY = 0;
+    var lastSpawn = 0;
+
+    document.addEventListener('mousemove', function(e) {
+        mx = e.clientX; my = e.clientY;
+        cursor.style.left = mx + 'px';
+        cursor.style.top  = my + 'px';
+
+        var now = Date.now();
+        var dx = mx - lastX, dy = my - lastY;
+        var dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (now - lastSpawn > 40 && dist > 5) {
+            lastSpawn = now; lastX = mx; lastY = my;
+            spawnCoins(mx, my, Math.min(3, Math.floor(dist / 10) + 1));
+        }
+    });
+
+    function spawnCoins(x, y, n) {
+        for (var i = 0; i < n; i++) {
+            (function() {
+                var el = document.createElement('div');
+                el.className = 'coin-particle';
+                var angle = (Math.random() * 140 + 20) * Math.PI / 180;
+                var speed = Math.random() * 60 + 30;
+                var tx = Math.cos(angle) * speed * (Math.random() > 0.5 ? 1 : -1);
+                var ty = Math.sin(angle) * speed + 40;
+                var rot = (Math.random() * 720 - 360) + 'deg';
+                var dur = (Math.random() * 400 + 400) + 'ms';
+                el.style.cssText = 'left:'+x+'px;top:'+y+'px;--tx:'+tx+'px;--ty:'+ty+'px;--rot:'+rot+';animation-duration:'+dur;
+                document.body.appendChild(el);
+                setTimeout(function() { el.parentNode && el.parentNode.removeChild(el); }, parseFloat(dur) + 50);
+            })();
+        }
+    }
+})();
+</script>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 html, body, [class*="css"] {
     font-family: 'Inter', -apple-system, sans-serif;
 }
@@ -291,9 +363,9 @@ PLOT_LAYOUT = dict(
     yaxis=dict(gridcolor="rgba(255,255,255,0.05)"),
 )
 
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
     "Dashboard", "Forecast", "Risk Engine",
-    "Rebalancing", "What-If", "Analytics", "Data",
+    "Rebalancing", "What-If", "Analytics", "Data", "Business Model",
 ])
 
 # ── TAB 1: Dashboard ───────────────────────────────────────────────────────────
@@ -851,6 +923,147 @@ with tab7:
                         st.rerun()
             except Exception as e:
                 st.error(f"Error: {e}")
+
+# ── TAB 8: Business Model ──────────────────────────────────────────────────────
+with tab8:
+    st.subheader("Business Model — LiquidityAI")
+
+    # ── Monetization ────────────────────────────────────────────────────────────
+    st.markdown("#### Монетизация")
+    mc1, mc2, mc3 = st.columns(3)
+    with mc1:
+        st.markdown("""
+<div class="card">
+  <div style="font-size:13px;color:#94a3b8;font-weight:500;margin-bottom:8px">SaaS Подписка</div>
+  <div style="font-size:22px;font-weight:700;color:#3b82f6;margin-bottom:8px">$2K–$15K / мес</div>
+  <div style="font-size:13px;color:#cbd5e1;line-height:1.6">
+    <b>Starter</b> — до 10 счетов, базовый прогноз: $2K<br>
+    <b>Pro</b> — до 50 счетов, API, алерты: $7K<br>
+    <b>Enterprise</b> — безлимит, SLA, on-premise: $15K+
+  </div>
+</div>""", unsafe_allow_html=True)
+    with mc2:
+        st.markdown("""
+<div class="card">
+  <div style="font-size:13px;color:#94a3b8;font-weight:500;margin-bottom:8px">Revenue Share</div>
+  <div style="font-size:22px;font-weight:700;color:#22c55e;margin-bottom:8px">5–15 bps</div>
+  <div style="font-size:13px;color:#cbd5e1;line-height:1.6">
+    С каждого подтверждённого перевода по рекомендации системы.<br>
+    При $50M/мес оборота → <b>$25K–75K</b> дополнительно.<br>
+    Клиент платит только за результат.
+  </div>
+</div>""", unsafe_allow_html=True)
+    with mc3:
+        st.markdown("""
+<div class="card">
+  <div style="font-size:13px;color:#94a3b8;font-weight:500;margin-bottom:8px">Professional Services</div>
+  <div style="font-size:22px;font-weight:700;color:#f59e0b;margin-bottom:8px">$500–$1500 / час</div>
+  <div style="font-size:13px;color:#cbd5e1;line-height:1.6">
+    Интеграция с ERP/CBS (SAP, Oracle).<br>
+    Кастомные ML-модели под клиента.<br>
+    Обучение treasury-команды.
+  </div>
+</div>""", unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── TAM / SAM / SOM ─────────────────────────────────────────────────────────
+    st.markdown("#### Объём рынка (TAM / SAM / SOM)")
+
+    tm1, tm2, tm3 = st.columns(3)
+    with tm1:
+        st.markdown("""
+<div style="background:#1e293b;border:1px solid #334155;border-top:3px solid #3b82f6;border-radius:12px;padding:20px;text-align:center">
+  <div style="font-size:12px;color:#94a3b8;font-weight:600;letter-spacing:0.08em;margin-bottom:8px">TAM — Total Addressable Market</div>
+  <div style="font-size:36px;font-weight:800;color:#3b82f6;margin:8px 0">$42B</div>
+  <div style="font-size:12px;color:#64748b">Глобальный рынок Treasury Management Software.<br>CAGR 12.4% до 2030 (Grand View Research 2024)</div>
+</div>""", unsafe_allow_html=True)
+    with tm2:
+        st.markdown("""
+<div style="background:#1e293b;border:1px solid #334155;border-top:3px solid #22c55e;border-radius:12px;padding:20px;text-align:center">
+  <div style="font-size:12px;color:#94a3b8;font-weight:600;letter-spacing:0.08em;margin-bottom:8px">SAM — Serviceable Addressable Market</div>
+  <div style="font-size:36px;font-weight:800;color:#22c55e;margin:8px 0">$8.4B</div>
+  <div style="font-size:12px;color:#64748b">Mid-size fintech и корпоративные казначейства (50–5000 сотрудников) в Европе, СНГ, MENA.<br>~20% от TAM</div>
+</div>""", unsafe_allow_html=True)
+    with tm3:
+        st.markdown("""
+<div style="background:#1e293b;border:1px solid #334155;border-top:3px solid #f59e0b;border-radius:12px;padding:20px;text-align:center">
+  <div style="font-size:12px;color:#94a3b8;font-weight:600;letter-spacing:0.08em;margin-bottom:8px">SOM — Serviceable Obtainable Market</div>
+  <div style="font-size:36px;font-weight:800;color:#f59e0b;margin:8px 0">$84M</div>
+  <div style="font-size:12px;color:#64748b">Целевой захват 1% SAM за 3 года.<br>~350 клиентов × $20K ARR avg.<br>Реалистичный план выхода</div>
+</div>""", unsafe_allow_html=True)
+
+    # Воронка
+    st.markdown("<br>", unsafe_allow_html=True)
+    fig_tam = go.Figure(go.Funnel(
+        y=["TAM — $42B", "SAM — $8.4B", "SOM — $84M"],
+        x=[42000, 8400, 84],
+        textinfo="label+percent initial",
+        marker=dict(color=["#3b82f6", "#22c55e", "#f59e0b"]),
+        connector=dict(line=dict(color="#334155", width=1)),
+    ))
+    fig_tam.update_layout(
+        height=280, margin=dict(t=10, b=10),
+        paper_bgcolor="rgba(0,0,0,0)", font_color="#cbd5e1",
+    )
+    st.plotly_chart(fig_tam, use_container_width=True)
+
+    st.divider()
+
+    # ── Competitor analysis ──────────────────────────────────────────────────────
+    st.markdown("#### Анализ конкурентов")
+
+    competitors = [
+        {"name": "Kyriba",        "price": "$$$$$", "ai": "Базовый",  "deploy": "Cloud",      "api": "Да",  "realtime": "Нет", "score": 65},
+        {"name": "SAP TRM",       "price": "$$$$$", "ai": "Нет",      "deploy": "On-premise", "api": "Да",  "realtime": "Нет", "score": 55},
+        {"name": "FIS Integrity", "price": "$$$$",  "ai": "Нет",      "deploy": "On-premise", "api": "Огр","realtime": "Нет", "score": 50},
+        {"name": "Coupa Treasury","price": "$$$$",  "ai": "Базовый",  "deploy": "Cloud",      "api": "Да",  "realtime": "Нет", "score": 60},
+        {"name": "LiquidityAI",   "price": "$$",    "ai": "ML-native","deploy": "Cloud/API",  "api": "Да",  "realtime": "Да",  "score": 92},
+    ]
+    comp_df = pd.DataFrame(competitors)
+
+    def style_row(row):
+        if row["name"] == "LiquidityAI":
+            return ["background-color:#0f2d1f;color:#22c55e;font-weight:700"] * len(row)
+        return [""] * len(row)
+
+    st.dataframe(
+        comp_df.rename(columns={
+            "name": "Продукт", "price": "Цена", "ai": "AI/ML",
+            "deploy": "Деплой", "api": "REST API", "realtime": "Real-time", "score": "Оценка /100"
+        }),
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    fig_comp = go.Figure()
+    colors = ["#64748b","#64748b","#64748b","#64748b","#22c55e"]
+    fig_comp.add_trace(go.Bar(
+        x=[c["name"] for c in competitors],
+        y=[c["score"] for c in competitors],
+        marker_color=colors,
+        text=[f"{c['score']}/100" for c in competitors],
+        textposition="outside",
+    ))
+    fig_comp.add_hline(y=80, line_dash="dot", line_color="#3b82f6", annotation_text="Целевой порог")
+    fig_comp.update_layout(
+        height=280, yaxis_title="Интегральная оценка", margin=dict(t=20, b=10),
+        yaxis=dict(range=[0,105], gridcolor="rgba(255,255,255,0.05)"),
+        xaxis=dict(gridcolor="rgba(255,255,255,0.05)"),
+        **{k: v for k, v in PLOT_LAYOUT.items() if k not in ("xaxis","yaxis")},
+    )
+    st.plotly_chart(fig_comp, use_container_width=True)
+
+    st.divider()
+
+    # ── Unit economics ───────────────────────────────────────────────────────────
+    st.markdown("#### Unit Economics")
+    ue1, ue2, ue3, ue4 = st.columns(4)
+    ue1.metric("CAC (привлечение клиента)",  "$8,500")
+    ue2.metric("LTV (3 года)",               "$72,000",  delta="LTV/CAC = 8.5x")
+    ue3.metric("Payback period",             "6 месяцев")
+    ue4.metric("Gross Margin",               "78%",       delta="SaaS benchmark 70–80%")
 
 # ── Footer ─────────────────────────────────────────────────────────────────────
 st.divider()
