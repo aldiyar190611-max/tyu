@@ -1,8 +1,9 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 import sys, os, json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
@@ -21,19 +22,16 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-</style>
+components.html("""
 <script>
 (function () {
     var lastX = 0, lastY = 0, lastT = 0;
+    var targetBody = window.parent.document.body;
 
     function spawnCoins(x, y, n) {
         for (var i = 0; i < n; i++) {
             (function () {
-                var coin = document.createElement('div');
+                var coin = window.parent.document.createElement('div');
                 var dur  = 500 + Math.random() * 400;
                 var tx   = (Math.random() > .5 ? 1 : -1) * (20 + Math.random() * 60);
                 var ty   = 50 + Math.random() * 80;
@@ -55,7 +53,7 @@ st.markdown("""
                     'transition:transform ' + dur + 'ms ease-out, opacity ' + dur + 'ms ease-out'
                 ].join(';');
 
-                document.body.appendChild(coin);
+                targetBody.appendChild(coin);
 
                 requestAnimationFrame(function () {
                     requestAnimationFrame(function () {
@@ -81,12 +79,10 @@ st.markdown("""
         }
     }
 
-    /* Streamlit рендерит в iframe — слушаем оба уровня */
-    document.addEventListener('mousemove', onMove);
-    try { window.parent.document.addEventListener('mousemove', onMove); } catch(e) {}
+    window.parent.document.addEventListener('mousemove', onMove);
 })();
 </script>
-""", unsafe_allow_html=True)
+""", height=0)
 
 st.markdown("""
 <style>
