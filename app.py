@@ -25,52 +25,65 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-.coin-particle {
-    position: fixed; pointer-events: none; z-index: 99998;
-    width: 10px; height: 10px; border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #ffd700, #b8860b);
-    border: 1px solid #ffa500;
-    box-shadow: 0 0 4px rgba(255,215,0,0.5);
-    animation: coinFall linear forwards;
-}
-@keyframes coinFall {
-    0%   { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
-    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0.3); }
-}
 </style>
 <script>
-(function() {
-    var lastX = 0, lastY = 0, lastSpawn = 0;
-
-    document.addEventListener('mousemove', function(e) {
-        var mx = e.clientX, my = e.clientY;
-        var now = Date.now();
-        var dx = mx - lastX, dy = my - lastY;
-        var dist = Math.sqrt(dx*dx + dy*dy);
-
-        if (now - lastSpawn > 40 && dist > 5) {
-            lastSpawn = now; lastX = mx; lastY = my;
-            spawnCoins(mx, my, Math.min(3, Math.floor(dist / 10) + 1));
-        }
-    });
+(function () {
+    var lastX = 0, lastY = 0, lastT = 0;
 
     function spawnCoins(x, y, n) {
         for (var i = 0; i < n; i++) {
-            (function() {
-                var el = document.createElement('div');
-                el.className = 'coin-particle';
-                var angle = (Math.random() * 140 + 20) * Math.PI / 180;
-                var speed = Math.random() * 60 + 30;
-                var tx = Math.cos(angle) * speed * (Math.random() > 0.5 ? 1 : -1);
-                var ty = Math.sin(angle) * speed + 40;
-                var rot = (Math.random() * 720 - 360) + 'deg';
-                var dur = (Math.random() * 400 + 400) + 'ms';
-                el.style.cssText = 'left:'+x+'px;top:'+y+'px;--tx:'+tx+'px;--ty:'+ty+'px;--rot:'+rot+';animation-duration:'+dur;
-                document.body.appendChild(el);
-                setTimeout(function() { el.parentNode && el.parentNode.removeChild(el); }, parseFloat(dur) + 50);
+            (function () {
+                var coin = document.createElement('div');
+                var dur  = 500 + Math.random() * 400;
+                var tx   = (Math.random() > .5 ? 1 : -1) * (20 + Math.random() * 60);
+                var ty   = 50 + Math.random() * 80;
+                var rot  = (Math.random() * 720 - 360);
+
+                coin.style.cssText = [
+                    'position:fixed',
+                    'left:' + x + 'px',
+                    'top:'  + y + 'px',
+                    'width:12px', 'height:12px',
+                    'border-radius:50%',
+                    'background:radial-gradient(circle at 35% 35%,#ffd700,#b8860b)',
+                    'border:1px solid #ffa500',
+                    'box-shadow:0 0 6px rgba(255,215,0,.7)',
+                    'pointer-events:none',
+                    'z-index:999999',
+                    'opacity:1',
+                    'transform:translate(0,0) rotate(0deg) scale(1)',
+                    'transition:transform ' + dur + 'ms ease-out, opacity ' + dur + 'ms ease-out'
+                ].join(';');
+
+                document.body.appendChild(coin);
+
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                        coin.style.transform = 'translate(' + tx + 'px,' + ty + 'px) rotate(' + rot + 'deg) scale(0.3)';
+                        coin.style.opacity   = '0';
+                    });
+                });
+
+                setTimeout(function () {
+                    if (coin.parentNode) coin.parentNode.removeChild(coin);
+                }, dur + 100);
             })();
         }
     }
+
+    function onMove(e) {
+        var x = e.clientX, y = e.clientY;
+        var now = Date.now();
+        var d = Math.hypot(x - lastX, y - lastY);
+        if (now - lastT > 40 && d > 6) {
+            lastT = now; lastX = x; lastY = y;
+            spawnCoins(x, y, Math.min(3, 1 + Math.floor(d / 15)));
+        }
+    }
+
+    /* Streamlit рендерит в iframe — слушаем оба уровня */
+    document.addEventListener('mousemove', onMove);
+    try { window.parent.document.addEventListener('mousemove', onMove); } catch(e) {}
 })();
 </script>
 """, unsafe_allow_html=True)
