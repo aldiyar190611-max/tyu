@@ -182,6 +182,166 @@ section[data-testid="stSidebar"] {
 hr { border-color: #334155 !important; }
 
 .kpi-row { display: flex; justify-content: space-between; padding: 8px 12px; background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; margin: 4px 0; }
+
+/* ── BUTTON ANIMATIONS ─────────────────────────────────── */
+.stButton > button {
+    transition: all 0.22s cubic-bezier(0.4,0,0.2,1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+.stButton > button:hover {
+    transform: translateY(-3px) scale(1.02) !important;
+    box-shadow: 0 10px 28px rgba(59,130,246,0.45) !important;
+    filter: brightness(1.12) !important;
+}
+.stButton > button:active {
+    transform: translateY(0) scale(0.97) !important;
+    box-shadow: 0 2px 8px rgba(59,130,246,0.25) !important;
+    transition-duration: 0.08s !important;
+}
+/* Ripple on click */
+.stButton > button::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 6px; height: 6px;
+    background: rgba(255,255,255,0.45);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(1) translate(-50%,-50%);
+    transform-origin: 50% 50%;
+}
+.stButton > button:focus::after {
+    animation: btn-ripple 0.55s ease-out !important;
+}
+@keyframes btn-ripple {
+    0%   { transform: scale(0) translate(-50%,-50%); opacity: 0.5; }
+    100% { transform: scale(38) translate(-50%,-50%); opacity: 0; }
+}
+/* Primary button — breathing glow */
+.stButton > button[kind="primary"] {
+    animation: btn-pulse 2.4s ease-in-out infinite !important;
+}
+@keyframes btn-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.5); }
+    50%      { box-shadow: 0 0 0 7px rgba(59,130,246,0); }
+}
+/* Form submit button — shimmer */
+[data-testid="stFormSubmitButton"] > button {
+    background: linear-gradient(135deg,#1d4ed8,#3b82f6,#1d4ed8) !important;
+    background-size: 200% auto !important;
+    animation: btn-shimmer 2.8s linear infinite !important;
+}
+@keyframes btn-shimmer {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+/* ── METRIC CARDS ──────────────────────────────────────── */
+[data-testid="stMetric"] {
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    animation: fade-up 0.45s ease-out both !important;
+}
+[data-testid="stMetric"]:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 14px 32px rgba(59,130,246,0.22) !important;
+}
+@keyframes fade-up {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── TABS ──────────────────────────────────────────────── */
+[data-baseweb="tab"] {
+    transition: color 0.18s ease, transform 0.18s ease !important;
+}
+[data-baseweb="tab"]:hover {
+    transform: translateY(-1px) !important;
+    color: #93c5fd !important;
+}
+
+/* ── CARDS (custom HTML) ───────────────────────────────── */
+.card,.card-ok,.card-warn,.card-bad,.rec-card,.rec-done {
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+.card:hover,.card-ok:hover,.card-warn:hover,.card-bad:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.35) !important;
+}
+
+/* ── ALERT CARDS ───────────────────────────────────────── */
+.alert-critical,.alert-high,.alert-medium,.alert-low {
+    animation: slide-in 0.3s ease-out both !important;
+    transition: transform 0.18s ease !important;
+}
+.alert-critical:hover,.alert-high:hover,.alert-medium:hover,.alert-low:hover {
+    transform: translateX(4px) !important;
+}
+@keyframes slide-in {
+    from { opacity:0; transform:translateX(-18px); }
+    to   { opacity:1; transform:translateX(0); }
+}
+
+/* ── EXPANDERS ─────────────────────────────────────────── */
+[data-testid="stExpander"] {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+[data-testid="stExpander"]:hover {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.3) !important;
+}
+
+/* ── SELECT / DROPDOWN ─────────────────────────────────── */
+[data-baseweb="select"] {
+    transition: box-shadow 0.2s ease !important;
+}
+[data-baseweb="select"]:hover {
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.35) !important;
+}
+
+/* ── SLIDER THUMB ──────────────────────────────────────── */
+[data-testid="stSlider"] [role="slider"] {
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+[data-testid="stSlider"] [role="slider"]:hover {
+    transform: scale(1.35) !important;
+    box-shadow: 0 0 0 6px rgba(59,130,246,0.25) !important;
+}
+
+/* ── INPUT FOCUS ───────────────────────────────────────── */
+input:focus, textarea:focus {
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.4) !important;
+    transition: box-shadow 0.2s ease !important;
+}
+
+/* ── PAGE TITLE ENTRANCE ───────────────────────────────── */
+.page-title {
+    animation: title-in 0.55s cubic-bezier(0.4,0,0.2,1) both !important;
+}
+@keyframes title-in {
+    from { opacity:0; transform:translateY(-12px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── LOGO ──────────────────────────────────────────────── */
+.liquidity-logo {
+    display: block;
+    margin-bottom: 4px;
+    filter: drop-shadow(0 0 6px rgba(56,189,248,0.35));
+    transition: filter 0.3s ease;
+    animation: logo-glow 3.5s ease-in-out infinite;
+}
+.liquidity-logo:hover { filter: drop-shadow(0 0 14px rgba(56,189,248,0.75)); }
+@keyframes logo-glow {
+    0%,100% { filter: drop-shadow(0 0 4px rgba(56,189,248,0.3)); }
+    50%      { filter: drop-shadow(0 0 12px rgba(56,189,248,0.7)); }
+}
+
+/* ── CHECKBOX ──────────────────────────────────────────── */
+[data-testid="stCheckbox"]:hover label {
+    color: #60a5fa !important;
+    transition: color 0.2s ease !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -217,8 +377,29 @@ def _gen_accounts():
     return None
 
 # ── Sidebar ────────────────────────────────────────────────────────────────────
+LOGO_SVG = """
+<svg class="liquidity-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 58" width="170" height="42">
+  <defs>
+    <linearGradient id="wg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7dd3fc"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+  <path d="M4,50 C14,35 26,46 36,41 C44,37 50,28 58,34 L58,56 C38,60 18,58 4,55 Z" fill="url(#wg)" opacity="0.88"/>
+  <rect x="28" y="34" width="6" height="17" rx="2" fill="url(#bg)"/>
+  <rect x="37" y="24" width="6" height="27" rx="2" fill="url(#bg)"/>
+  <rect x="46" y="15" width="6" height="36" rx="2" fill="url(#bg)"/>
+  <path d="M28,31 Q37,20 46,11 Q53,6 62,15" stroke="#38bdf8" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <text x="74" y="40" font-family="Inter,sans-serif" font-size="18" font-weight="500" fill="#94a3b8">Liquidity</text>
+  <text x="178" y="40" font-family="Inter,sans-serif" font-size="18" font-weight="700" fill="#38bdf8">AI</text>
+</svg>"""
+
 with st.sidebar:
-    st.markdown('<div class="sidebar-logo">LiquidityAI</div>', unsafe_allow_html=True)
+    st.markdown(LOGO_SVG, unsafe_allow_html=True)
     st.caption("Treasury Management System v2.0")
     st.divider()
 
@@ -315,11 +496,32 @@ recs        = optimizer.recommend(state_f, fc_f)
 idle        = optimizer.idle_report(state_f)
 
 # ── Header ─────────────────────────────────────────────────────────────────────
+LOGO_SVG_LG = """
+<svg class="liquidity-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 58" width="220" height="54">
+  <defs>
+    <linearGradient id="wg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7dd3fc"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+  <path d="M4,50 C14,35 26,46 36,41 C44,37 50,28 58,34 L58,56 C38,60 18,58 4,55 Z" fill="url(#wg2)" opacity="0.88"/>
+  <rect x="28" y="34" width="6" height="17" rx="2" fill="url(#bg2)"/>
+  <rect x="37" y="24" width="6" height="27" rx="2" fill="url(#bg2)"/>
+  <rect x="46" y="15" width="6" height="36" rx="2" fill="url(#bg2)"/>
+  <path d="M28,31 Q37,20 46,11 Q53,6 62,15" stroke="#38bdf8" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <text x="74" y="40" font-family="Inter,sans-serif" font-size="18" font-weight="500" fill="#94a3b8">Liquidity</text>
+  <text x="178" y="40" font-family="Inter,sans-serif" font-size="18" font-weight="700" fill="#38bdf8">AI</text>
+</svg>"""
+
 if st.session_state.demo_mode:
-    st.markdown('<div class="page-title" style="color:#ef4444">Critical — SWIFT Outage Detected</div>', unsafe_allow_html=True)
+    st.markdown(LOGO_SVG_LG + '<div class="page-title" style="color:#ef4444;margin-top:8px">Critical — SWIFT Outage Detected</div>', unsafe_allow_html=True)
     st.error("System detected: liquidity deficit risk within 48h on SWIFT accounts. Go to Rebalancing to confirm transfers.")
 else:
-    st.markdown('<div class="page-title">LiquidityAI — Treasury Management</div>', unsafe_allow_html=True)
+    st.markdown(LOGO_SVG_LG + '<div class="page-title" style="margin-top:8px">LiquidityAI — Treasury Management</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="page-subtitle">{df["date"].max().strftime("%d %B %Y")} &nbsp;|&nbsp; {len(state_f)} accounts &nbsp;|&nbsp; Horizon: {horizon} days</div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
