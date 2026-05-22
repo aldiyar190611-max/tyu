@@ -25,17 +25,6 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Coin cursor */
-* { cursor: none !important; }
-#coin-cursor {
-    position: fixed; pointer-events: none; z-index: 99999;
-    width: 20px; height: 20px; border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #ffd700, #b8860b);
-    border: 2px solid #ffa500;
-    box-shadow: 0 0 8px rgba(255,215,0,0.6);
-    transform: translate(-50%, -50%);
-    transition: transform 0.05s;
-}
 .coin-particle {
     position: fixed; pointer-events: none; z-index: 99998;
     width: 10px; height: 10px; border-radius: 50%;
@@ -49,19 +38,12 @@ st.markdown("""
     100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0.3); }
 }
 </style>
-<div id="coin-cursor"></div>
 <script>
 (function() {
-    var cursor = document.getElementById('coin-cursor');
-    var mx = 0, my = 0;
-    var lastX = 0, lastY = 0;
-    var lastSpawn = 0;
+    var lastX = 0, lastY = 0, lastSpawn = 0;
 
     document.addEventListener('mousemove', function(e) {
-        mx = e.clientX; my = e.clientY;
-        cursor.style.left = mx + 'px';
-        cursor.style.top  = my + 'px';
-
+        var mx = e.clientX, my = e.clientY;
         var now = Date.now();
         var dx = mx - lastX, dy = my - lastY;
         var dist = Math.sqrt(dx*dx + dy*dy);
