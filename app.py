@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 import sys, os, json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -799,13 +799,20 @@ with tab4:
 
     st.divider()
 
-    if not recs:
-        st.success("All accounts balanced. No rebalancing required.")
-    else:
-        confirmed_cnt = sum(1 for r in recs if r["id"] in st.session_state.confirmed_transfers)
-        st.markdown(f"**{len(recs)} recommendations** &nbsp;|&nbsp; Confirmed: {confirmed_cnt} / {len(recs)}")
+    # Разделяем на срочные переводы и idle-оптимизацию
+    urgent_recs = [r for r in recs if r.get("type") != "IDLE_OPTIMIZATION"]
+    idle_recs   = [r for r in recs if r.get("type") == "IDLE_OPTIMIZATION"]
 
-        for i, rec in enumerate(recs):
+    if not urgent_recs and not idle_recs:
+        st.success("All accounts balanced. No rebalancing required.")
+    
+    # ── Срочные переводы между счетами ──
+    if urgent_recs:
+        confirmed_cnt = sum(1 for r in urgent_recs if r["id"] in st.session_state.confirmed_transfers)
+        st.markdown(f"### 🔴 Transfer recommendations")
+        st.markdown(f"**{len(urgent_recs)} transfers** &nbsp;|&nbsp; Confirmed: {confirmed_cnt} / {len(urgent_recs)}")
+
+        for i, rec in enumerate(urgent_recs):
             is_confirmed = rec["id"] in st.session_state.confirmed_transfers
             card_css = "rec-done" if is_confirmed else "rec-card"
             urg_css  = "badge-urgent" if rec["urgency"] == "НЕМЕДЛЕННО" else "badge-normal"
@@ -834,6 +841,48 @@ with tab4:
                     st.rerun()
             else:
                 st.success("Transfer confirmed — execution in progress")
+
+    # ── Idle capital оптимизация ──
+    if idle_recs:
+        if urgent_recs:
+            st.divider()
+        st.markdown("### 💰 Idle capital optimization")
+        total_idle_annual = sum(
+            r["amount"] * FX_RATES[r["currency_from"]] * 0.045
+            for r in idle_recs
+        )
+        st.info(f"**{len(idle_recs)} accounts** have idle capital above target balance. "
+                f"Total potential income: **${total_idle_annual:,.0f}/yr** at 4.5% annual rate.")
+
+        for i, rec in enumerate(idle_recs):
+            is_confirmed = rec["id"] in st.session_state.confirmed_transfers
+            card_css = "rec-done" if is_confirmed else "rec-card"
+            annual = rec["amount"] * FX_RATES[rec["currency_from"]] * 0.045
+
+            st.markdown(f"""
+<div class="{card_css}" style="border-left: 3px solid #22c55e;">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+    <strong style="font-size:14px;color:#f1f5f9">{rec['from_account']} &rarr; {rec['to_account']}</strong>
+    <span style="background:#14532d;color:#86efac;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600">ОПТИМИЗАЦИЯ</span>
+  </div>
+  <div style="font-size:22px;font-weight:700;margin:12px 0;color:#22c55e">
+    {rec['amount']:,.0f} {rec['currency_from']}
+    <span style="font-size:13px;color:#64748b;font-weight:400;margin-left:12px">+${annual:,.0f}/yr income</span>
+  </div>
+  <div style="color:#64748b;font-size:12px">
+    Transfer time: {rec['transfer_time_days']}d &nbsp;&middot;&nbsp; Cost: ~{rec['cost_bps']} bps
+  </div>
+  <div style="margin-top:6px;font-size:13px;color:#94a3b8">{rec['reason']}</div>
+</div>""", unsafe_allow_html=True)
+
+            if not is_confirmed:
+                btn_col, _ = st.columns([2, 5])
+                if btn_col.button(f"Place in Money Market #{i+1}", key=f"idle_{i}", type="primary"):
+                    st.session_state.confirmed_transfers[rec["id"]] = rec
+                    st.cache_data.clear()
+                    st.rerun()
+            else:
+                st.success("Placement confirmed — funds allocated to money market")
 
 
 # ── TAB 5: What-If ─────────────────────────────────────────────────────────────
