@@ -182,36 +182,39 @@ class LiquidityOptimizer:
                 needed -= amt
                 if needed <= 0:
                     break
+
         recs.sort(key=lambda x: (x["urgency"], -x["roi"]))
+
         # --- Idle capital recommendations ---
-ANNUAL_RATE = 0.045
-for s in surplus:
-    if s["available_excess"] < 50_000:
-        continue
-    idle_usd = s["available_excess"] * FX_RATES[s["currency"]]
-    annual_income = idle_usd * ANNUAL_RATE
-    recs.append({
-        "id": f"idle_{s['account_id']}_MONEY_MARKET",
-        "from_account": s["account_name"],
-        "from_id": s["account_id"],
-        "to_account": "💰 Доходный депозит / Money Market",
-        "to_id": "MONEY_MARKET",
-        "amount": s["available_excess"],
-        "amount_dest": s["available_excess"],
-        "currency_from": s["currency"],
-        "currency_to": s["currency"],
-        "transfer_time_days": 1,
-        "cost_bps": 1,
-        "estimated_cost": s["available_excess"] * 0.0001,
-        "urgency": "ОПТИМИЗАЦИЯ",
-        "reason": (
-            f"Idle-капитал {s['available_excess']:,.0f} {s['currency']} "
-            f"сверх целевого баланса. При размещении под 4.5% — "
-            f"+${annual_income:,.0f} дохода в год."
-        ),
-        "roi": annual_income / max(s["available_excess"] * 0.0001, 1),
-        "type": "IDLE_OPTIMIZATION",
-    })
+        ANNUAL_RATE = 0.045
+        for s in surplus:
+            if s["available_excess"] < 50_000:
+                continue
+            idle_usd = s["available_excess"] * FX_RATES[s["currency"]]
+            annual_income = idle_usd * ANNUAL_RATE
+            recs.append({
+                "id": f"idle_{s['account_id']}_MONEY_MARKET",
+                "from_account": s["account_name"],
+                "from_id": s["account_id"],
+                "to_account": "💰 Доходный депозит / Money Market",
+                "to_id": "MONEY_MARKET",
+                "amount": s["available_excess"],
+                "amount_dest": s["available_excess"],
+                "currency_from": s["currency"],
+                "currency_to": s["currency"],
+                "transfer_time_days": 1,
+                "cost_bps": 1,
+                "estimated_cost": s["available_excess"] * 0.0001,
+                "urgency": "ОПТИМИЗАЦИЯ",
+                "reason": (
+                    f"Idle-капитал {s['available_excess']:,.0f} {s['currency']} "
+                    f"сверх целевого баланса. При размещении под 4.5% — "
+                    f"+${annual_income:,.0f} дохода в год."
+                ),
+                "roi": annual_income / max(s["available_excess"] * 0.0001, 1),
+                "type": "IDLE_OPTIMIZATION",
+            })
+
         return recs
 
     def idle_report(self, state: pd.DataFrame) -> dict:
