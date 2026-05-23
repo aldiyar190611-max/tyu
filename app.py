@@ -662,7 +662,7 @@ with tab2:
         acc_state = state_f[state_f["account_id"] == sel_acc].iloc[0]
         hist14    = df[(df["account_id"]==sel_acc) & (df["date"] >= df["date"].max()-pd.Timedelta(days=14))]
 
-        p_short = model.p_shortage(sel_acc, acc_state["min_balance"], fc_f, current_balance=acc_state["balance"])
+        p_short = model.p_shortage(sel_acc, acc_state["min_balance"], fc_f)
         p_color = "#ef4444" if p_short > 0.3 else "#f59e0b" if p_short > 0.1 else "#22c55e"
 
         pm1, pm2, pm3, pm4 = st.columns(4)
@@ -712,10 +712,7 @@ with tab3:
 
     risk_rows = []
     for _, row in state_f.iterrows():
-        current_bal = row["balance"]
-        min_bal     = row["min_balance"]
-        # Pass current balance so p_shortage immediately returns 1.0 for active deficits
-        p = model.p_shortage(row["account_id"], min_bal, fc_f, current_balance=current_bal)
+        p = model.p_shortage(row["account_id"], row["min_balance"], fc_f)
         risk_rows.append({
             "Account": row["account_name"],
             "Currency": row["currency"],
