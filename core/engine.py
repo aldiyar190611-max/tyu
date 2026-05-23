@@ -149,22 +149,32 @@ class LiquidityOptimizer:
                     proj = fc.iloc[-1]["q50"]
             ex = proj - (row["target_balance"] + buf)
             sh = (row["min_balance"] + buf) - proj
+
+            # Счёт может быть одновременно в обоих списках не может,
+            # но surplus строится независимо от deficit —
+            # любой счёт с excess > 0 идёт в surplus (даже если не дефицитный)
             if ex > 50_000:
                 surplus.append({**row, "available_excess": ex, "proj_balance": proj})
-            elif sh > 50_000:
+            if sh > 50_000:
                 deficit.append({**row, "needed": sh, "proj_balance": proj})
 
         recs = []
         for d in deficit:
-            needed = d["needed"]
+            needed_usd = d["needed"] * FX_RATES[d["currency"]]
             for s in surplus:
                 if s["available_excess"] < 1_000:
                     continue
-                amt = min(needed, s["available_excess"])
+                # Конвертируем excess источника в USD для сравнения
+                excess_usd = s["available_excess"] * FX_RATES[s["currency"]]
+                transfer_usd = min(needed_usd, excess_usd)
+                # Переводим обратно в валюту источника
+                amt = transfer_usd / FX_RATES[s["currency"]]
+                # И в валюту получателя
+                amt_dest = transfer_usd / FX_RATES[d["currency"]]
+
                 cbps = TRANSFER_COST_BPS.get((s["currency"], d["currency"]),
                        TRANSFER_COST_BPS.get((d["currency"], s["currency"]), 20))
                 ttime = max(TRANSFER_TIME[s["payment_system"]], TRANSFER_TIME[d["payment_system"]])
-                amt_dest = amt * FX_RATES[s["currency"]] / FX_RATES[d["currency"]] if s["currency"] != d["currency"] else amt
                 cost = amt * cbps / 10_000
                 urgency = "НЕМЕДЛЕННО" if d["needed"] >= d["proj_balance"] * 0.5 else "В ТЕЧЕНИЕ 24Ч"
                 recs.append({
@@ -179,8 +189,8 @@ class LiquidityOptimizer:
                     "roi": (d["needed"] * 0.05 / 365) / max(cost, 1),
                 })
                 s["available_excess"] -= amt
-                needed -= amt
-                if needed <= 0:
+                needed_usd -= transfer_usd
+                if needed_usd <= 100:
                     break
 
         recs.sort(key=lambda x: (x["urgency"], -x["roi"]))
