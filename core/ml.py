@@ -136,11 +136,15 @@ class CashFlowForecaster:
             frames.append(self.forecast(acc_id, days=days, current_balance=bal))
         return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
-    def p_shortage(self, acc_id: str, min_balance: float, forecasts: pd.DataFrame) -> float:
+    def p_shortage(self, acc_id: str, min_balance: float, forecasts: pd.DataFrame, current_balance: float | None = None) -> float:
+        # If current balance is already below minimum — certain deficit
+        if current_balance is not None and current_balance < min_balance:
+            return 1.0
         fc = forecasts[forecasts["account_id"] == acc_id]
         if fc.empty:
             return 0.0
         last = fc.iloc[-1]
         if last["std"] <= 0:
             return 1.0 if last["q50"] < min_balance else 0.0
-        return float(sp_norm.cdf(min_balance, loc=last["q50"], scale=last["std"] * np.sqrt(len(fc))))
+        # Use std without sqrt(n) scaling — it inflates uncertainty and masks real risk
+        return float(sp_norm.cdf(min_balance, loc=last["q50"], scale=max(last["std"], 1.0)))
