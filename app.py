@@ -463,7 +463,7 @@ if _accs:
 if st.session_state.demo_mode:
     for idx, row in state.iterrows():
         if row["payment_system"] == "SWIFT":
-            nb = row["balance"] * 0.35
+            nb = row["balance"] * 0.05
             state.loc[idx, "balance"]        = nb
             state.loc[idx, "usd_equivalent"] = nb * _fx.get(row["currency"], 1.0)
             state.loc[idx, "deficit"]        = max(0.0, row["min_balance"] - nb)
