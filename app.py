@@ -117,7 +117,7 @@ section[data-testid="stSidebar"] {
 }
 
 .page-title {
-    font-size: 2.4rem;
+    font-size: 2.9rem;
     font-weight: 700;
     color: #f1f5f9;
     letter-spacing: -0.02em;
@@ -128,7 +128,7 @@ section[data-testid="stSidebar"] {
     margin-top: 4px;
 }
 .sidebar-logo {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: 700;
     color: #3b82f6;
     letter-spacing: -0.01em;
@@ -378,7 +378,7 @@ def _gen_accounts():
 
 # ── Sidebar ────────────────────────────────────────────────────────────────────
 LOGO_SVG = """
-<svg class="liquidity-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 58" width="220" height="54">
+<svg class="liquidity-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 58" width="260" height="64">
   <defs>
     <linearGradient id="wg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#38bdf8"/>
@@ -497,7 +497,7 @@ idle        = optimizer.idle_report(state_f)
 
 # ── Header ─────────────────────────────────────────────────────────────────────
 LOGO_SVG_LG = """
-<svg class="liquidity-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 58" width="300" height="74">
+<svg class="liquidity-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 58" width="360" height="88">
   <defs>
     <linearGradient id="wg2" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#38bdf8"/>
